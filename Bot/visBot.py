@@ -4,6 +4,8 @@ import time
 import random
 import numpy as np
 
+from mpltlibstyle import *
+
 
 msgFromClient       = "requestjoin:mydisplayname"
 name = "mydisplayname"
@@ -42,6 +44,7 @@ UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 seen_walls=[]
 seen_floor=[]
 botmap = np.full((500,500),0)
+setup()
 
 
 def SendMessage(requestmovemessage):
@@ -73,8 +76,8 @@ while True:
            if coords not in seen_walls:
                #print(coords)
                seen_walls.append(coords)
-               botmap[int(coords[0]),int(coords[1])]=15
-        np.set_printoptions(threshold=np.inf)
+               botmap[int(coords[0]),int(coords[1])]=1
+        show(botmap)
         
     now = time.time()
 
