@@ -43,7 +43,7 @@ UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
 seen_walls=[]
 seen_floor=[]
-botmap = np.full((500,500),0)
+botmap = np.full((100,100),0)
 setup()
 
 
@@ -76,7 +76,7 @@ while True:
            if coords not in seen_walls:
                #print(coords)
                seen_walls.append(coords)
-               botmap[int(coords[0]),int(coords[1])]=1
+               botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
         show(botmap)
         
     now = time.time()
