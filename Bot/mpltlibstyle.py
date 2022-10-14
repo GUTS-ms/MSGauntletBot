@@ -1,3 +1,4 @@
+import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -17,18 +18,17 @@ import matplotlib.pyplot as plt
 
 
 # X = np.random.randint(256, size=(100, 100))
-def setup():
-    # map = np.zeros((500, 500))
+def setup(map):
     fig = plt.figure(figsize=(8, 8))
-    # map[0][10] = 1
-    #puts map into the plot
-    # plt.imshow(map)
     # invert the y axis so 0 at bottom
     ax = plt.gca()
     ax.invert_yaxis()
 
     plt.title("Dungeon visualization")
-    # return map
+    plt.imshow(map)
+    plt.ion()
+    plt.show()
+    return map
 
 
 # shows in ide
@@ -36,3 +36,4 @@ def show(map):
     plt.close()
     plt.imshow(map)
     plt.show()
+    return map

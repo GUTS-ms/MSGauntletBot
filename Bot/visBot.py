@@ -42,9 +42,9 @@ UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
 seen_walls=[]
-seen_floor=[]
+seen_floors=[]
 botmap = np.full((100,100),0)
-setup()
+botmap = setup(botmap)
 
 
 def SendMessage(requestmovemessage):
@@ -87,7 +87,20 @@ while True:
                seen_walls.append(coords)
                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
         show(botmap)
-
+        
+    if "nearbyfloors" in msgFromServer:
+        floors = msgFromServer.split(":")[1]
+        floorsSplit = floors.split(",")
+        floorscoords = []
+        for i in range (0,len(floorsSplit)-1, 2):
+            floorscoords.append((floorsSplit[i],floorsSplit[i+1]))
+        for coords in floorscoords:
+           if coords not in seen_floors:
+               #print(coords)
+               seen_floors.append(coords)
+               botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
+        show(botmap)
+    now = time.time()
 
     def make_step():
         print(int(int(posy)/8),int(int(posx)/8))
