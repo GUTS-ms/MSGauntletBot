@@ -17,7 +17,7 @@ serverAddressPort   = ("127.0.0.1", 11000)
 bufferSize          = 1024
 
 #bunch of timers and intervals for executing some sample commands
-moveInterval = 10
+moveInterval = 5
 timeSinceMove = time.time()
 
 fireInterval = 5
@@ -51,7 +51,7 @@ def SendMessage(requestmovemessage):
     bytesToSend = str.encode(requestmovemessage)
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
-
+startcount = 0
 
 while True:
 
@@ -59,12 +59,21 @@ while True:
     
     ##uncomment to see message format from server
     ##print(msgFromServer)
-    
     if "playerupdate" in msgFromServer:
         pos = msgFromServer.split(":")[1]
         posSplit = pos.split(",")
         posx = round(float(posSplit[0]))
         posy = round(float(posSplit[1]))
+        if startcount == 0:
+            while(int(posx)%8 != 0):
+                posx - 1
+            while(int(posy)%8 != 0):
+                posy - 1
+            startcount += 1
+            requestmovemessage = "moveto:" + str(posx)  + "," + str(posy)
+            SendMessage(requestmovemessage)
+        botmap[int(int(posy)/8),int(int(posx)/8)]=8
+
         
     if "nearbywalls" in msgFromServer:
         walls = msgFromServer.split(":")[1]
@@ -78,52 +87,31 @@ while True:
                seen_walls.append(coords)
                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
         show(botmap)
+
+
+    def make_step():
+        print(int(int(posy)/8),int(int(posx)/8))
+        if botmap[(int(int(posy)/8))-1][int(int(posx)/8)] != 1:
+            requestmovemessage = "moveto:" + str(posx - 8)  + "," + str(posy)
+            SendMessage(requestmovemessage)
+        elif botmap[int(int(posy)/8)][(int(int(posx)/8))-1] != 1:
+            requestmovemessage = "moveto:" + str(posx)  + "," + str(posy-8)
+            SendMessage(requestmovemessage)
+        elif botmap[(int(int(posy)/8))+1][int(int(posx)/8)] != 1:
+            requestmovemessage = "moveto:" + str(posx + 8)  + "," + str(posy)
+            SendMessage(requestmovemessage)
+        elif botmap[int(int(posy)/8)][(int(int(posx)/8))+1] != 1:
+            requestmovemessage = "moveto:" + str(posx)  + "," + str(posy + 8)
+            SendMessage(requestmovemessage)
+        else:
+            randomDirection = random.choice(directions)
+            directionMoveMessage = "movedirection:" + randomDirection
+            SendMessage(directionMoveMessage)
+
         
     now = time.time()
 
     #every few seconds, request to move to a random point nearby. No pathfinding, server will 
     #attempt to move in straight line.
     if (now - timeSinceMove) > moveInterval:
-        randomX = random.randrange(-50,50)
-        randomY = random.randrange(-50,50)
-        posx += randomX
-        posy += randomY
-
-        timeSinceMove = time.time()
-        requestmovemessage = "moveto:" + str(posx)  + "," + str(posy)
-        SendMessage(requestmovemessage)
-        print(requestmovemessage)
-
-    #let's fire
-    if (now - timeSinceFire) > fireInterval:
-        timeSinceFire = time.time()
-        fireMessage = "fire:"
-        SendMessage(fireMessage)
-        print(fireMessage)
-       
-        
-
-    if(now - timeSinceStop) > stopInterval:
-        stopMessage = "stop:"
-        SendMessage(stopMessage)
-        timeSinceStop = time.time()
-        print(stopMessage)
-
-
-    if(now - timeSinceDirectionMove) > directionMoveInterval:
-
-        randomDirection = random.choice(directions)
-        directionMoveMessage = "movedirection:" + randomDirection
-        SendMessage(directionMoveMessage)
-        timeSinceDirectionMove = time.time()
-        print(directionMoveMessage)
-
-    if(now - timeSinceDirectionFace) > directionFaceInterval:
-
-        randomDirection = random.choice(directions)
-        directionFaceMessage = "facedirection:" + randomDirection
-        SendMessage(directionFaceMessage)
-        timeSinceDirectionFace = time.time()
-        print(directionFaceMessage)
-
-
+        make_step()
