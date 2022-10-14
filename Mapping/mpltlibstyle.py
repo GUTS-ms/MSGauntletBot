@@ -2,11 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # COLOURS
-# 0 == BLANK
+# 0 == Unknown
 # 1 == WALL
 # 2 == FLOOR
-# 3 == BLANK
-# 4 == BLANK
+# 3 == Keys
+# 4 == Food
+# 5 == Ammo
+# 6 == Players
+# 7 == Exit
+# 8 == Sprite looking N
+# 9 == Sprite looking E
+# 10 == Sprite looking S
+# 11 == Sprite looking W
 
 
 # X = np.random.randint(256, size=(100, 100))
