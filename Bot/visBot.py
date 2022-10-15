@@ -38,11 +38,11 @@ def find_unexp(arr):
                     return (y[1], y[2])
     print("no unexplored found")
 
-def find_player_neighbors(posx, posy):
+def find_player_neighbors(x, y):
     neighb = []
     for i in range(-1,1):
         for j in range(-1,1):
-            neighb.append((posx+i, posy+j))
+            neighb.append((x+i, y+j))
     return neighb
 
 msgFromClient       = "requestjoin:mydisplayname"
@@ -122,9 +122,8 @@ while True:
             print(int(posy), int(posx))
         posxby8 = posx/8
         posyby8 = posy/8
-        
+
     if "nearbywalls" in msgFromServer:
-        print(msgFromServer)
         walls = msgFromServer.split(":")[1]
         wallsSplit = walls.split(",")
         wallcoords = []
