@@ -31,15 +31,11 @@ def find_neighbors(a, i, j):
 
 def find_unexp():
     best = 0
-    all_floor_tiles = list(floor_connections.keys())
-    coords = (posyby8,posxby8)
-    for floortile in all_floor_tiles:
-        neighbours = list(floor_connections[floortile].values())
-        unexplored = neighbours.count(0)
-        if unexplored > best:
-            best = unexplored
-            coords = floortile
-    print(coords,botmap[coords[0]][coords[1]])
+    coords = (0,0)
+    for k, v in floor_connections.items():
+        if len(v) > best:
+            best = len(v)
+            coords = k
     return coords
 
 
@@ -63,7 +59,7 @@ serverAddressPort   = ("127.0.0.1", 11000)
 bufferSize          = 1024
 
 #bunch of timers and intervals for executing some sample commands
-moveInterval = 2
+moveInterval = 5
 timeSinceMove = time.time()
 
 fireInterval = 5
@@ -103,14 +99,17 @@ def heuristic(a, b):
         return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
 
 def make_step(posx,posy,botmap):
-    start = (posy,posx)
-    goal = find_unexp()
+    start = (int(posy),int(posx))
     route = []
-    while route == []:
+    if route == []:
         goal = find_unexp()
+        goal = (goal[1],goal[0])
+        print(start,goal)
         route = astar(botmap, start, goal)
-    route = route + [start]
+    else:
+        route = [(posy+1,posx+1),(posy,posx)]
     route = route[::-1]
+    print(route)
     x_coords = []
     y_coords = []
 
@@ -121,14 +120,26 @@ def make_step(posx,posy,botmap):
         y_move_direction = int(posy - y)
         new_x_pos = int((posx*8) - (x_move_direction*8))
         new_y_pos = int((posy*8) - (y_move_direction*8))
-        requestmovemessage = "moveto:" + str(int(new_y_pos))  + "," + str(int(new_x_pos))
-        #print(requestmovemessage)
+        requestmovemessage = "moveto:" + str(int(new_x_pos))  + "," + str(int(new_y_pos))
+        print(requestmovemessage)
         SendMessage(requestmovemessage)
         x_coords.append(x)
         y_coords.append(y)
 
+    fig, ax = plt.subplots(figsize=(20,20))
+
+    ax.imshow(botmap, cmap=plt.cm.Dark2)
+
+    ax.scatter(start[0],start[1], marker = "*", color = "yellow", s = 200)
+
+    ax.scatter(goal[0],goal[1], marker = "*", color = "red", s = 200)
+
+    ax.plot(x_coords,y_coords, color = "black")
+
+    plt.show()
+
 def astar(array, start, goal):
-    neighbors = [(0,1),(0,-1),(1,0),(-1,0),(1,1),(1,-1),(-1,1),(-1,-1)]
+    neighbors = [(0,1),(0,-1),(1,0),(-1,0)]
     close_set = set()
     came_from = {}
     gscore = {start:0}
@@ -141,7 +152,7 @@ def astar(array, start, goal):
         if current == goal:
             data = []
             while current in came_from:
-                data.append(current)
+                data.append((current[1],current[0]))
                 current = came_from[current]
             return data
         close_set.add(current)
@@ -151,7 +162,7 @@ def astar(array, start, goal):
             tentative_g_score = gscore[current] + heuristic(current, neighbor)
             if 0 <= neighbor[0] < array.shape[0]:
                 if 0 <= neighbor[1] < array.shape[1]:                
-                    if array[int(neighbor[0]),int(neighbor[1])] == 1:
+                    if array[int(neighbor[1]),int(neighbor[0])] != 2:
                         continue
                 else:
                     # array bound y walls
@@ -231,19 +242,22 @@ while True:
             if (int(coords[0]), int(coords[1])) not in seen_floors:
                 seen_floors.append(coords)
                 botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
-            if floors_done == True:
+            if floors_done == False:
                 coords_8 = (int(int(coords[1])/8),int(int(coords[0])/8))
-                floor_connections[coords_8] = {}
+                floor_connections[coords_8] = []
                 for floortile in floor_connections.keys():
                     tile_neighbours_list = find_player_neighbors(floortile[0],floortile[1])
                     for neighbour in tile_neighbours_list:
-                        floor_connections[floortile][neighbour] = botmap[neighbour[0]][neighbour[1]]
-        floors_done = True
+                        if botmap[neighbour[0]][neighbour[1]] == 0:
+                            if neighbour not in floor_connections[floortile]:
+                                floor_connections[floortile].append(neighbour)
+        floors_done = False
     now = time.time()
 
     #every few seconds, request to move to a random point nearby. No pathfinding, server will 
     #attempt to move in straight line.
     if (now - timeSinceMove) > moveInterval:
         plot(botmap)
-        make_step(posyby8,posxby8,botmap)
+        if floor_connections != {}:
+            make_step(posyby8,posxby8,botmap)
         timeSinceMove = time.time()
