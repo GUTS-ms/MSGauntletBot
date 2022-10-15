@@ -1,6 +1,14 @@
-# import matplotlib
-# import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+from tkinter import *
+import numpy as np
+import time
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
+
+
+import os
+
 # COLOURS
 # 0 == Unknown
 # 1 == WALL
@@ -16,20 +24,29 @@ import matplotlib.pyplot as plt
 # 11 == Sprite looking W
 
 
-# X = np.random.randint(256, size=(100, 100))
 
-def setup(map):
-    fig = plt.figure(figsize=(8, 8))
-    # invert the y axis so 0 at bottom
-    ax = plt.gca()
-    ax.invert_yaxis()
-    ax.xaxis.tick_top()
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.title("Dungeon visualization")
-    plt.imshow(map)
-    plt.show()
+botmap=np.full((500,500),0)
 
-def show(map):
-    plt.imshow(map)
-    plt.show()
+
+def plot(botmap):
+    root = Tk()
+    root.geometry("700x700+10+10")
+
+    fig = Figure(figsize=(5,5), dpi=100)
+    fig.clear()
+    fig.add_subplot(111).imshow(botmap)
+
+    canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
+    canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
+    toolbar = NavigationToolbar2Tk(canvas, root)
+
+    canvas.draw_idle()
+    root.after(2000, root.destroy)
+    root.mainloop()
+
+
+
+
+
+
+
