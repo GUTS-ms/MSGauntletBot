@@ -29,16 +29,6 @@ def find_neighbors(a, i, j):
                     neighbors.append((a[y][z],y,z))
     return neighbors
 
-def find_unexp():
-    best = 0
-    coords = (0,0)
-    for k, v in floor_connections.items():
-        if len(v) > best:
-            best = len(v)
-            coords = k
-    return coords
-
-
 def find_player_neighbors(x, y):
     neighb = []
     for i in range(-1,2):
@@ -49,8 +39,8 @@ def find_player_neighbors(x, y):
                 neighb.append((int((x+i)), int((y+j))))
     return neighb
 
-msgFromClient       = "requestjoin:mydisplayname"
-name = "mydisplayname"
+msgFromClient       = "requestjoin:BestBot"
+name = "BestBot"
 
 bytesToSend         = str.encode(msgFromClient)
 
@@ -59,7 +49,7 @@ serverAddressPort   = ("127.0.0.1", 11000)
 bufferSize          = 1024
 
 #bunch of timers and intervals for executing some sample commands
-moveInterval = 5
+moveInterval = 2
 timeSinceMove = time.time()
 
 fireInterval = 5
@@ -98,16 +88,22 @@ def SendMessage(requestmovemessage):
 def heuristic(a, b):
         return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
 
+
+
+
 def make_step(posx,posy,botmap):
     start = (int(posy),int(posx))
     route = []
-    if route == []:
-        goal = find_unexp()
+    best_coords = []
+    for k in sorted(floor_connections, key=lambda k: len(floor_connections[k]), reverse=True):
+            best_coords.append(k)
+    counter = 0
+    while route == []:
+        goal = best_coords[counter]
         goal = (goal[1],goal[0])
-        print(start,goal)
         route = astar(botmap, start, goal)
-    else:
-        route = [(posy+1,posx+1),(posy,posx)]
+        counter += 1
+
     route = route[::-1]
     print(route)
     x_coords = []
@@ -123,20 +119,21 @@ def make_step(posx,posy,botmap):
         requestmovemessage = "moveto:" + str(int(new_x_pos))  + "," + str(int(new_y_pos))
         print(requestmovemessage)
         SendMessage(requestmovemessage)
+        time.sleep(0.25)
         x_coords.append(x)
         y_coords.append(y)
 
-    fig, ax = plt.subplots(figsize=(20,20))
+    #fig, ax = plt.subplots(figsize=(20,20))
 
-    ax.imshow(botmap, cmap=plt.cm.Dark2)
+    #ax.imshow(botmap, cmap=plt.cm.Dark2)
 
-    ax.scatter(start[0],start[1], marker = "*", color = "yellow", s = 200)
+    #ax.scatter(start[0],start[1], marker = "*", color = "yellow", s = 200)
 
-    ax.scatter(goal[0],goal[1], marker = "*", color = "red", s = 200)
+    #ax.scatter(goal[0],goal[1], marker = "*", color = "red", s = 200)
 
-    ax.plot(x_coords,y_coords, color = "black")
+    #ax.plot(x_coords,y_coords, color = "black")
 
-    plt.show()
+    #plt.show()
 
 def astar(array, start, goal):
     neighbors = [(0,1),(0,-1),(1,0),(-1,0)]

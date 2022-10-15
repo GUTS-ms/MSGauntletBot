@@ -42,7 +42,7 @@ def plot(botmap):
 
     canvas.draw_idle()
     root.after(1000, root.destroy)
-    #root.mainloop()
+    root.mainloop()
 
 
 
