@@ -1,7 +1,6 @@
-import matplotlib
-import numpy as np
+# import matplotlib
+# import numpy as np
 import matplotlib.pyplot as plt
-matplotlib.use('TkAgg')
 # COLOURS
 # 0 == Unknown
 # 1 == WALL
@@ -18,12 +17,19 @@ matplotlib.use('TkAgg')
 
 
 # X = np.random.randint(256, size=(100, 100))
-def show(map):
+
+def setup(map):
     fig = plt.figure(figsize=(8, 8))
     # invert the y axis so 0 at bottom
     ax = plt.gca()
     ax.invert_yaxis()
     ax.xaxis.tick_top()
+    plt.xlabel("x")
+    plt.ylabel("y")
     plt.title("Dungeon visualization")
+    plt.imshow(map)
+    plt.show()
+
+def show(map):
     plt.imshow(map)
     plt.show()

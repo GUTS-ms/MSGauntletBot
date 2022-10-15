@@ -1,4 +1,4 @@
-
+import math
 import socket
 import time
 import random
@@ -82,7 +82,8 @@ UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 seen_walls=[]
 seen_floors=[]
 botmap = np.full((50,50),0)
-#setup(botmap)
+prev = [0,0]
+setup(botmap)
 
 
 def SendMessage(requestmovemessage):
@@ -110,10 +111,17 @@ while True:
             startcount += 1
             requestmovemessage = "moveto:" + str(posx)  + "," + str(posy)
             SendMessage(requestmovemessage)
+        if prev[0] != int(int(posy)/8) or prev[1] != int(int(posx)/8):
+            botmap[int(int(posy)/8),int(int(posx)/8)]=8
+            botmap[prev[0], prev[1]] = 2
+            prev[0], prev[1] = int(int(posy)/8),int(int(posx)/8)
+            show(botmap)
+            print("round: ")
+            print(int(int(posy) / 8), int(int(posx) / 8))
+            print("O G  : ")
+            print(int(posy), int(posx))
         posxby8 = posx/8
         posyby8 = posy/8
-        botmap[int(int(posy)/8),int(int(posx)/8)]=8
-
         
     if "nearbywalls" in msgFromServer:
         print(msgFromServer)
