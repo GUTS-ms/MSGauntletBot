@@ -2,9 +2,10 @@ import matplotlib
 import matplotlib.pyplot as plt
 from tkinter import *
 import numpy as np
-
+import time
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
+import os
 
 # COLOURS
 # 0 == Unknown
@@ -21,44 +22,34 @@ from matplotlib.figure import Figure
 # 11 == Sprite looking W
 
 
-# X = np.random.randint(256, size=(100, 100))
+map=np.full((50,50),1)
 
-window_width = 1000
-window_height = 600
 
-root = Tk()
 
-fig = Figure(figsize=(5, 5), dpi=100)
+#fig = Figure(figsize=(5, 5), dpi=100)
 
-canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
-canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
-toolbar = NavigationToolbar2Tk(canvas, root)
+#canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
+#canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
+#toolbar = NavigationToolbar2Tk(canvas, root)
 
 def draw_chart():
     fig.clear()
-    fig.add_subplot(111).plot(np.random.randint(1,10,5), np.random.randint(10,20,5)) #generate random x/y
-    canvas.draw_idle()
+    fig.add_subplot(111).matshow(map) #generate random x/y
+    canvas.draw()
 
-Button(root,text="Draw",command=draw_chart).pack()
-
-root.mainloop()
-
-def setup():
-    # map = np.zeros((500, 500))
-    fig = plt.figure(figsize=(8, 8))
-    # map[0][10] = 1
-    #puts map into the plot
-    # plt.imshow(map)
-    # invert the y axis so 0 at bottom
-    ax = plt.gca()
-    ax.invert_yaxis()
-
-    plt.title("Dungeon visualization")
-    # return map
+def plot():
+    while True:
+        root = Tk()
+        root.geometry("700x700+10+10")
+        root.after(5000, root.destroy)
+        root.mainloop()
 
 
-# shows in ide
-def show(map):
-    plt.close()
-    plt.imshow(map)
-    plt.show()
+
+after()
+
+
+
+
+
+
