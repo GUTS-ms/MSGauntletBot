@@ -29,21 +29,28 @@ def find_neighbors(a, i, j):
                     neighbors.append((a[y][z],y,z))
     return neighbors
 
-def find_unexp(arr):
-    for pos, x in np.ndenumerate(arr):
-        if x == 0:
-            neighb=find_neighbors(arr, pos[0], pos[1])
-            for y in neighb:
-                if y[0] == 2:
-                    print("found unexplored at " + str(y[2]) +" " + str(y[1]))
-                    return (y[2], y[1])
-    print("no unexplored found")
+def find_unexp():
+    best = 0
+    all_floor_tiles = list(floor_connections.keys())
+    coords = (posyby8,posxby8)
+    for floortile in all_floor_tiles:
+        neighbours = list(floor_connections[floortile].values())
+        unexplored = neighbours.count(0)
+        if unexplored > best:
+            best = unexplored
+            coords = floortile
+    print(coords,botmap[coords[0]][coords[1]])
+    return coords
+
 
 def find_player_neighbors(x, y):
     neighb = []
     for i in range(-1,2):
         for j in range(-1,2):
-            neighb.append((int((x+i)*8), int((y+j)*8)))
+            if i == 0 and j == 0:
+                continue
+            else:
+                neighb.append((int((x+i)), int((y+j))))
     return neighb
 
 msgFromClient       = "requestjoin:mydisplayname"
@@ -56,7 +63,7 @@ serverAddressPort   = ("127.0.0.1", 11000)
 bufferSize          = 1024
 
 #bunch of timers and intervals for executing some sample commands
-moveInterval = 5
+moveInterval = 2
 timeSinceMove = time.time()
 
 fireInterval = 5
@@ -64,9 +71,6 @@ timeSinceFire = time.time()
 
 stopInterval = 30
 timeSinceStop = time.time()
-
-plotInterval = 5
-timeSincePlot = time.time()
 
 directionMoveInterval = 15
 timeSinceDirectionMove = time.time()
@@ -85,8 +89,10 @@ UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
 seen_walls=[]
 seen_floors=[]
-botmap = np.full((50,50),0)
+floor_connections = {}
+botmap = np.full((100,100),0)
 prev = None
+floors_done = False
 
 
 def SendMessage(requestmovemessage):
@@ -96,14 +102,15 @@ def SendMessage(requestmovemessage):
 def heuristic(a, b):
         return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
 
-def make_step(posx,posy,next_move,botmap):
+def make_step(posx,posy,botmap):
     start = (posy,posx)
-
-    goal = next_move
-    route = astar(botmap, start, goal)
+    goal = find_unexp()
+    route = []
+    while route == []:
+        goal = find_unexp()
+        route = astar(botmap, start, goal)
     route = route + [start]
     route = route[::-1]
-    print(route)
     x_coords = []
     y_coords = []
 
@@ -114,8 +121,6 @@ def make_step(posx,posy,next_move,botmap):
         y_move_direction = int(posy - y)
         new_x_pos = int((posx*8) - (x_move_direction*8))
         new_y_pos = int((posy*8) - (y_move_direction*8))
-        print(new_x_pos)
-        print(new_y_pos)
         requestmovemessage = "moveto:" + str(int(new_y_pos))  + "," + str(int(new_x_pos))
         #print(requestmovemessage)
         SendMessage(requestmovemessage)
@@ -212,9 +217,8 @@ while True:
             wallcoords.append((wallsSplit[i],wallsSplit[i+1]))
         for coords in wallcoords:
             if (int(coords[0]), int(coords[1])) not in seen_walls:
-                if (int(coords[0]), int(coords[1])) in player_neighb:
-                    seen_walls.append(coords)
-                    botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
+                seen_walls.append(coords)
+                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
         
     if "nearbyfloors" in msgFromServer:
         # print(msgFromServer)
@@ -225,19 +229,21 @@ while True:
             floorscoords.append((floorsSplit[i],floorsSplit[i+1]))
         for coords in floorscoords:
             if (int(coords[0]), int(coords[1])) not in seen_floors:
-                if (int(coords[0]), int(coords[1])) in player_neighb:
-                    seen_floors.append(coords)
-                    botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
+                seen_floors.append(coords)
+                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
+            if floors_done == True:
+                coords_8 = (int(int(coords[1])/8),int(int(coords[0])/8))
+                floor_connections[coords_8] = {}
+                for floortile in floor_connections.keys():
+                    tile_neighbours_list = find_player_neighbors(floortile[0],floortile[1])
+                    for neighbour in tile_neighbours_list:
+                        floor_connections[floortile][neighbour] = botmap[neighbour[0]][neighbour[1]]
+        floors_done = True
     now = time.time()
 
     #every few seconds, request to move to a random point nearby. No pathfinding, server will 
     #attempt to move in straight line.
     if (now - timeSinceMove) > moveInterval:
-        next_move = find_unexp(botmap)
         plot(botmap)
-        make_step(posyby8,posxby8,next_move,botmap)
+        make_step(posyby8,posxby8,botmap)
         timeSinceMove = time.time()
-
-    #if (now - timeSincePlot) > plotInterval:
-    #    plot(botmap)
-    #    timeSincePlot = time.time()
