@@ -1,0 +1,16 @@
+﻿port:11000
+manualplayerone:false
+manualplayertwo:false
+starthealth:1
+maxhealth:10
+startammo:5
+maxammo:10
+treasurevalue:10
+killvalue:10
+deathrespawntimer:10
+dungeonsize:m
+healthspawn:5
+ammospawn:5
+treasurespawn:5
+dungeoneditmode:n
+

@@ -37,7 +37,7 @@ directions = ["n","s","e","w","nw","sw","ne","se"]
 
 # Create a UDP socket
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
- 
+
 # Send to server using created UDP socket
 UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
@@ -82,10 +82,10 @@ while True:
         for i in range (0,len(wallsSplit)-1, 2):
             wallcoords.append((wallsSplit[i],wallsSplit[i+1]))
         for coords in wallcoords:
-           if coords not in seen_walls:
-               seen_walls.append(coords)
-               botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
-        show(botmap)
+            if coords not in seen_walls:
+                seen_walls.append(coords)
+                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
+        # show(botmap)
         
     if "nearbyfloors" in msgFromServer:
         floors = msgFromServer.split(":")[1]
@@ -94,10 +94,10 @@ while True:
         for i in range (0,len(floorsSplit)-1, 2):
             floorscoords.append((floorsSplit[i],floorsSplit[i+1]))
         for coords in floorscoords:
-           if coords not in seen_floors:
-               seen_floors.append(coords)
-               botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
-        show(botmap)
+            if coords not in seen_floors:
+                seen_floors.append(coords)
+                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
+        # show(botmap)
     now = time.time()
 
     def make_step():
