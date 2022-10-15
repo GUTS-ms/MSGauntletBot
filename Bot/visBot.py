@@ -35,8 +35,8 @@ def find_unexp(arr):
             neighb=find_neighbors(arr, pos[0], pos[1])
             for y in neighb:
                 if y[0] == 2:
-                    print("found unexplored at " + str(y[1]) +" " + str(y[2]))
-                    return (y[1], y[2])
+                    print("found unexplored at " + str(y[2]) +" " + str(y[1]))
+                    return (y[2], y[1])
     print("no unexplored found")
 
 def find_player_neighbors(x, y):
@@ -94,9 +94,10 @@ def SendMessage(requestmovemessage):
 def heuristic(a, b):
         return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
 
-def make_step(posx,posy):
+def make_step(posx,posy,next_move,botmap):
     start = (posy,posx)
-    goal = (50,50)
+
+    goal = next_move
     route = astar(botmap, start, goal)
     route = route + [start]
     route = route[::-1]
@@ -104,19 +105,20 @@ def make_step(posx,posy):
     x_coords = []
     y_coords = []
 
-    for i in (range(0,len(route))):
-        x = route[i][0]
-        y = route[i][1]
+    for i in (range(1,len(route))):
+        x = route[i][1]
+        y = route[i][0]
+        x_move_direction = int(posx - x)
+        y_move_direction = int(posy - y)
+        new_x_pos = int((posx*8) - (x_move_direction*8))
+        new_y_pos = int((posy*8) - (y_move_direction*8))
+        print(new_x_pos)
+        print(new_y_pos)
+        requestmovemessage = "moveto:" + str(int(new_y_pos))  + "," + str(int(new_x_pos))
+        #print(requestmovemessage)
+        SendMessage(requestmovemessage)
         x_coords.append(x)
         y_coords.append(y)
-
-        # plot map and path
-    fig, ax = plt.subplots(figsize=(20,20))
-    ax.imshow(botmap, cmap=plt.cm.Dark2)
-    ax.scatter(start[1],start[0], marker = "*", color = "yellow", s = 200)
-    ax.scatter(goal[1],goal[0], marker = "*", color = "red", s = 200)
-    ax.plot(y_coords,x_coords, color = "black")
-    plt.show()
 
 def astar(array, start, goal):
     neighbors = [(0,1),(0,-1),(1,0),(-1,0),(1,1),(1,-1),(-1,1),(-1,-1)]
@@ -142,7 +144,7 @@ def astar(array, start, goal):
             tentative_g_score = gscore[current] + heuristic(current, neighbor)
             if 0 <= neighbor[0] < array.shape[0]:
                 if 0 <= neighbor[1] < array.shape[1]:                
-                    if array[neighbor[0]][neighbor[1]] == 1:
+                    if array[int(neighbor[0]),int(neighbor[1])] == 1:
                         continue
                 else:
                     # array bound y walls
@@ -162,7 +164,14 @@ def astar(array, start, goal):
 
     return []
 
-startcount = 0
+def nearestX(num, x):
+  d = num // x
+  a = d * x
+  b = a + x
+  if b - num <= num - a:
+    return b
+  else:
+    return a
 
 while True:
 
@@ -172,17 +181,12 @@ while True:
     ##print(msgFromServer)
     if "playerupdate" in msgFromServer:
         pos = msgFromServer.split(":")[1]
+        
         posSplit = pos.split(",")
         posx = round(float(posSplit[0]))
         posy = round(float(posSplit[1]))
-        if startcount == 0:
-            while(int(posx)%8 != 0):
-                posx -= 1
-            while(int(posy)%8 != 0):
-                posy -= 1
-            startcount += 1
-            requestmovemessage = "moveto:" + str(posx)  + "," + str(posy)
-            SendMessage(requestmovemessage)
+        posx = nearestX(posx,8)
+        posy = nearestX(posy,8)
         if prev:
             if prev[0] != int(int(posy)/8) or prev[1] != int(int(posx)/8):
                 botmap[int(int(posy)/8),int(int(posx)/8)]=8
@@ -224,13 +228,13 @@ while True:
                 if (int(coords[0]), int(coords[1])) in player_neighb:
                     seen_floors.append(coords)
                     botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
-        show(botmap)
-        print("hi")
-        print(seen_floors)
+        #show(botmap)
     now = time.time()
 
     #every few seconds, request to move to a random point nearby. No pathfinding, server will 
     #attempt to move in straight line.
     if (now - timeSinceMove) > moveInterval:
-        find_unexp(botmap)
-        # make_step(posyby8,posxby8)
+        next_move = find_unexp(botmap)
+        make_step(posyby8,posxby8,next_move,botmap)
+        timeSinceMove = time.time()
+        show(botmap)
