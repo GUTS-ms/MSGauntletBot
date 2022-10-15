@@ -13,7 +13,7 @@ import os
 # 0 == Unknown
 # 1 == WALL
 # 2 == FLOOR
-# 3 == Keys
+# 3 == Treasure
 # 4 == Food
 # 5 == Ammo
 # 6 == Players
@@ -22,6 +22,10 @@ import os
 # 9 == Sprite looking E
 # 10 == Sprite looking S
 # 11 == Sprite looking W
+# 12 == redkey
+# 13 == greenkey
+# 14 == yellowkey
+# 15 == bluekey
 
 
 
