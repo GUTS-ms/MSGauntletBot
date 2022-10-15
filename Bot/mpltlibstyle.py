@@ -25,7 +25,7 @@ import os
 
 
 
-botmap=np.full((500,500),0)
+botmap=np.full((50,50),0)
 
 
 def plot(botmap):

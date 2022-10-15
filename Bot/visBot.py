@@ -65,6 +65,9 @@ timeSinceFire = time.time()
 stopInterval = 30
 timeSinceStop = time.time()
 
+plotInterval = 5
+timeSincePlot = time.time()
+
 directionMoveInterval = 15
 timeSinceDirectionMove = time.time()
 
@@ -84,7 +87,6 @@ seen_walls=[]
 seen_floors=[]
 botmap = np.full((50,50),0)
 prev = None
-setup(botmap)
 
 
 def SendMessage(requestmovemessage):
@@ -192,7 +194,6 @@ while True:
                 botmap[int(int(posy)/8),int(int(posx)/8)]=8
                 botmap[prev[0], prev[1]] = 2
                 prev[0], prev[1] = int(int(posy)/8),int(int(posx)/8)
-                # show(botmap)
                 # print("round: ")
                 # print(int(int(posy) / 8), int(int(posx) / 8))
                 # print("O G  : ")
@@ -214,7 +215,6 @@ while True:
                 if (int(coords[0]), int(coords[1])) in player_neighb:
                     seen_walls.append(coords)
                     botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
-        # show(botmap)
         
     if "nearbyfloors" in msgFromServer:
         # print(msgFromServer)
@@ -228,13 +228,16 @@ while True:
                 if (int(coords[0]), int(coords[1])) in player_neighb:
                     seen_floors.append(coords)
                     botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
-        #show(botmap)
     now = time.time()
 
     #every few seconds, request to move to a random point nearby. No pathfinding, server will 
     #attempt to move in straight line.
     if (now - timeSinceMove) > moveInterval:
         next_move = find_unexp(botmap)
+        plot(botmap)
         make_step(posyby8,posxby8,next_move,botmap)
         timeSinceMove = time.time()
-        show(botmap)
+
+    #if (now - timeSincePlot) > plotInterval:
+    #    plot(botmap)
+    #    timeSincePlot = time.time()
