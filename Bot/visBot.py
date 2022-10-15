@@ -6,6 +6,44 @@ import numpy as np
 
 from mpltlibstyle import *
 
+# function to find the start row and column
+def find_start(x):
+    start = x-1 if x-1 >= 0 else 0
+    return start
+
+# function to find the end row and column
+def find_end(x, shape):
+    end = x+1 if x+1 <= shape else shape
+    return end
+
+def find_neighbors(a, i, j):
+    neighbors = []
+    row_start, row_end = find_start(i), find_end(i, a.shape[0])
+    col_start, col_end = find_start(j), find_end(j, a.shape[1])
+
+    for y in range(a.shape[0]):
+        for z in range(a.shape[1]):
+            if y >= row_start and y <= row_end:
+                if z >= col_start and z <= col_end:
+                    neighbors.append((a[y][z],y,z))
+    return neighbors
+
+def find_unexp(arr):
+    for pos, x in np.ndenumerate(arr):
+        if x == 0:
+            neighb=find_neighbors(arr, pos[0], pos[1])
+            for y in neighb:
+                if y[0] == 2:
+                    print("found unexplored at " + str(y[1]) +" " + str(y[2]))
+                    return (y[1], y[2])
+    print("no unexplored found")
+
+def find_player_neighbors(posx, posy):
+    neighb = []
+    for i in range(-1,1):
+        for j in range(-1,1):
+            neighb.append((posx+i, posy+j))
+    return neighb
 
 msgFromClient       = "requestjoin:mydisplayname"
 name = "mydisplayname"
@@ -66,16 +104,19 @@ while True:
         posy = round(float(posSplit[1]))
         if startcount == 0:
             while(int(posx)%8 != 0):
-                posx - 1
+                posx -= 1
             while(int(posy)%8 != 0):
-                posy - 1
+                posy -= 1
             startcount += 1
             requestmovemessage = "moveto:" + str(posx)  + "," + str(posy)
             SendMessage(requestmovemessage)
+        posxby8 = posx/8
+        posyby8 = posy/8
         botmap[int(int(posy)/8),int(int(posx)/8)]=8
 
         
     if "nearbywalls" in msgFromServer:
+        print(msgFromServer)
         walls = msgFromServer.split(":")[1]
         wallsSplit = walls.split(",")
         wallcoords = []
@@ -83,11 +124,13 @@ while True:
             wallcoords.append((wallsSplit[i],wallsSplit[i+1]))
         for coords in wallcoords:
             if coords not in seen_walls:
-                seen_walls.append(coords)
-                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
-        # show(botmap)
+                if coords in find_player_neighbors(posxby8,posyby8):
+                    seen_walls.append(coords)
+                    botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
+        show(botmap)
         
     if "nearbyfloors" in msgFromServer:
+        print(msgFromServer)
         floors = msgFromServer.split(":")[1]
         floorsSplit = floors.split(",")
         floorscoords = []
@@ -95,9 +138,10 @@ while True:
             floorscoords.append((floorsSplit[i],floorsSplit[i+1]))
         for coords in floorscoords:
             if coords not in seen_floors:
-                seen_floors.append(coords)
-                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
-        # show(botmap)
+                if coords in find_player_neighbors(posxby8,posyby8):
+                    seen_floors.append(coords)
+                    botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
+        show(botmap)
     now = time.time()
 
     def make_step():
@@ -118,11 +162,10 @@ while True:
             randomDirection = random.choice(directions)
             directionMoveMessage = "movedirection:" + randomDirection
             SendMessage(directionMoveMessage)
-
-        
     now = time.time()
 
     #every few seconds, request to move to a random point nearby. No pathfinding, server will 
     #attempt to move in straight line.
     if (now - timeSinceMove) > moveInterval:
+        find_unexp(botmap)
         make_step()
