@@ -44,7 +44,7 @@ UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 seen_walls=[]
 seen_floor=[]
 botmap = np.full((100,100),0)
-setup()
+draw_chart(botmap)
 
 
 def SendMessage(requestmovemessage):
@@ -77,7 +77,7 @@ while True:
                #print(coords)
                seen_walls.append(coords)
                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
-        show(botmap)
+        draw_chart(botmap)
         
     now = time.time()
 
