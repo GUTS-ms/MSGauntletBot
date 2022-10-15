@@ -74,7 +74,7 @@ while True:
             requestmovemessage = "moveto:" + str(posx)  + "," + str(posy)
             SendMessage(requestmovemessage)
         if prev[0] != int(int(posy)/8) or prev[1] != int(int(posx)/8):
-            botmap[int(int(posy)/8),int(int(posx)/8)+1]=8
+            botmap[int(int(posy)/8),int(int(posx)/8)]=8
             botmap[prev[0], prev[1]] = 2
             prev[0], prev[1] = int(int(posy)/8),int(int(posx)/8)
             show(botmap)
