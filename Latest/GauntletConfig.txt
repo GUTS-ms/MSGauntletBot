@@ -12,5 +12,8 @@ dungeonsize:m
 healthspawn:5
 ammospawn:5
 treasurespawn:5
-dungeoneditmode:n
+noitems:false
+deathmatchmode:false
+spawnitemsduringgame:false
+itemspawntimer:5
 
