@@ -41,9 +41,9 @@ def find_unexp(arr):
 
 def find_player_neighbors(x, y):
     neighb = []
-    for i in range(-1,1):
-        for j in range(-1,1):
-            neighb.append((x+i, y+j))
+    for i in range(-1,2):
+        for j in range(-1,2):
+            neighb.append((int((x+i)*8), int((y+j)*8)))
     return neighb
 
 msgFromClient       = "requestjoin:mydisplayname"
@@ -83,7 +83,7 @@ UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 seen_walls=[]
 seen_floors=[]
 botmap = np.full((50,50),0)
-prev = [0,0]
+prev = None
 setup(botmap)
 
 
@@ -183,17 +183,21 @@ while True:
             startcount += 1
             requestmovemessage = "moveto:" + str(posx)  + "," + str(posy)
             SendMessage(requestmovemessage)
-        if prev[0] != int(int(posy)/8) or prev[1] != int(int(posx)/8):
+        if prev:
+            if prev[0] != int(int(posy)/8) or prev[1] != int(int(posx)/8):
+                botmap[int(int(posy)/8),int(int(posx)/8)]=8
+                botmap[prev[0], prev[1]] = 2
+                prev[0], prev[1] = int(int(posy)/8),int(int(posx)/8)
+                # show(botmap)
+                # print("round: ")
+                # print(int(int(posy) / 8), int(int(posx) / 8))
+                # print("O G  : ")
+                # print(int(posy), int(posx))
+        else:
             botmap[int(int(posy)/8),int(int(posx)/8)]=8
-            botmap[prev[0], prev[1]] = 2
-            prev[0], prev[1] = int(int(posy)/8),int(int(posx)/8)
-            show(botmap)
-            print("round: ")
-            print(int(int(posy) / 8), int(int(posx) / 8))
-            print("O G  : ")
-            print(int(posy), int(posx))
         posxby8 = posx/8
         posyby8 = posy/8
+        player_neighb = find_player_neighbors(posxby8,posyby8)
 
     if "nearbywalls" in msgFromServer:
         walls = msgFromServer.split(":")[1]
@@ -202,28 +206,31 @@ while True:
         for i in range (0,len(wallsSplit)-1, 2):
             wallcoords.append((wallsSplit[i],wallsSplit[i+1]))
         for coords in wallcoords:
-            if coords not in seen_walls:
-                seen_walls.append(coords)
-                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
+            if (int(coords[0]), int(coords[1])) not in seen_walls:
+                if (int(coords[0]), int(coords[1])) in player_neighb:
+                    seen_walls.append(coords)
+                    botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
         # show(botmap)
         
     if "nearbyfloors" in msgFromServer:
-        print(msgFromServer)
+        # print(msgFromServer)
         floors = msgFromServer.split(":")[1]
         floorsSplit = floors.split(",")
         floorscoords = []
         for i in range (0,len(floorsSplit)-1, 2):
             floorscoords.append((floorsSplit[i],floorsSplit[i+1]))
         for coords in floorscoords:
-            if coords not in seen_floors:
-                if coords in find_player_neighbors(posxby8,posyby8):
+            if (int(coords[0]), int(coords[1])) not in seen_floors:
+                if (int(coords[0]), int(coords[1])) in player_neighb:
                     seen_floors.append(coords)
                     botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
         show(botmap)
+        print("hi")
+        print(seen_floors)
     now = time.time()
 
     #every few seconds, request to move to a random point nearby. No pathfinding, server will 
     #attempt to move in straight line.
     if (now - timeSinceMove) > moveInterval:
         find_unexp(botmap)
-        make_step(posyby8,posxby8)
+        # make_step(posyby8,posxby8)
