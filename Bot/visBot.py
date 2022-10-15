@@ -43,8 +43,8 @@ UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
 seen_walls=[]
 seen_floors=[]
-botmap = np.full((100,100),0)
-botmap = setup(botmap)
+botmap = np.full((50,50),0)
+#setup(botmap)
 
 
 def SendMessage(requestmovemessage):
@@ -83,7 +83,6 @@ while True:
             wallcoords.append((wallsSplit[i],wallsSplit[i+1]))
         for coords in wallcoords:
            if coords not in seen_walls:
-               #print(coords)
                seen_walls.append(coords)
                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
         show(botmap)
@@ -96,14 +95,13 @@ while True:
             floorscoords.append((floorsSplit[i],floorsSplit[i+1]))
         for coords in floorscoords:
            if coords not in seen_floors:
-               #print(coords)
                seen_floors.append(coords)
                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
         show(botmap)
     now = time.time()
 
     def make_step():
-        print(int(int(posy)/8),int(int(posx)/8))
+        #print(int(int(posy)/8),int(int(posx)/8))
         if botmap[(int(int(posy)/8))-1][int(int(posx)/8)] != 1:
             requestmovemessage = "moveto:" + str(posx - 8)  + "," + str(posy)
             SendMessage(requestmovemessage)
