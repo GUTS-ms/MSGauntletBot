@@ -77,6 +77,7 @@ seen_walls=[]
 seen_floors=[]
 floor_connections = {}
 botmap = np.full((100,100),0)
+seen_items=[]
 prev = None
 floors_done = False
 
@@ -237,6 +238,7 @@ while True:
             floorscoords.append((floorsSplit[i],floorsSplit[i+1]))
         for coords in floorscoords:
             if (int(coords[0]), int(coords[1])) not in seen_floors:
+
                 seen_floors.append(coords)
                 botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
             if floors_done == False:
@@ -249,6 +251,70 @@ while True:
                             if neighbour not in floor_connections[floortile]:
                                 floor_connections[floortile].append(neighbour)
         floors_done = False
+
+
+    # nearbyplayers
+
+    # Warrior - Red == 16
+    # Elf - Green == 17
+    # Wizard - Yellow == 18
+    # Valkyrie - Blue == 19
+
+    if "nearbyplayer" in msgFromServer:
+        players = msgFromServer.split(":")[1]
+        playersSplit = players.split(",")
+        playerCoords = []
+        for i in range(0, len(playersSplit) - 1, 3):
+            playerCoords.append([playersSplit[i], playersSplit[i + 1], playersSplit[i + 2]])
+        for coords in playerCoords:
+            if (int(coords[1]), int(coords[2])) in player_neighb:
+                player = coords[0].lower()
+                print("player is: " + player)
+                if player == "warrior" or player == "red":
+                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 16
+                if player == "elf" or player == "green":
+                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 17
+                if player == "wizard" or player == "yellow":
+                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 18
+                if player == "valkyrie" or player == "blue":
+                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 19
+
+    # possible items
+    # 3 == Treasure
+    # 4 == Food
+    # 5 == Ammo
+    # 12 == redkey
+    # 13 == greenkey
+    # 14 == yellowkey
+    # 15 == bluekey
+
+    if "nearbyitem" in msgFromServer:
+        items = msgFromServer.split(":")[1]
+        itemsSplit = items.split(",")
+        itemCoords = []
+        for i in range(0, len(itemsSplit) - 1, 3):
+            itemCoords.append([itemsSplit[i], itemsSplit[i + 1], itemsSplit[i + 2]])
+        for coords in itemCoords:
+            if (int(coords[1]), int(coords[2])) not in seen_items:
+                if (int(coords[1]), int(coords[2])) in player_neighb:
+                    seen_items.append((int(coords[1]), int(coords[2])))
+                    item = coords[0].lower()
+                    print("item is: " + item)
+                    if item == "treasure":
+                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 3
+                    if item == "food":
+                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 4
+                    if item == "ammo":
+                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 5
+                    if item == "redkey":
+                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 12
+                    if item == "greenkey":
+                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 13
+                    if item == "yellowkey":
+                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 14
+                    if item == "bluekey":
+                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 15
+
     now = time.time()
 
     #every few seconds, request to move to a random point nearby. No pathfinding, server will 
