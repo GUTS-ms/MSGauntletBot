@@ -99,30 +99,30 @@ wizard = None
 valkyrie = None
 
 global exit
-exit = None
+exit = (None,None)
 
 global keyLocation
-keyLocation = None
+keyLocation = (None,None)
 global keyInBag
-keyInBag = False
+keyInBag = "False"
 
 def SendMessage(requestmovemessage):
     bytesToSend = str.encode(requestmovemessage)
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
 def heuristic(a, b):
-        return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
-
-
-
+        return np.sqrt((int(b[0]) - int(a[0])) ** 2 + (int(b[1]) - int(a[1])) ** 2)
 
 def make_step(posx,posy,botmap):
+    global keyInBag
     start = (int(posy),int(posx))
     route = []
     best_coords = []
-    if keyLocation != None:
+    print("key locatoin" + str(keyLocation))
+    if keyLocation != (None,None):
         route = astar(botmap, start, keyLocation)
-    if exit != None and keyInBag == True:
+        keyInBag == "True"
+    if exit != (None,None) and keyInBag == "True":
         route = astar(botmap, start, exit)
     for k in sorted(floor_connections, key=lambda k: len(floor_connections[k]), reverse=True):
             best_coords.append(k)
@@ -227,6 +227,9 @@ while True:
         pos = msgFromServer.split(":")[1]
         
         posSplit = pos.split(",")
+        print(posSplit)
+        keyInBag = posSplit[4]
+        print(keyInBag)
         posx = round(float(posSplit[0]))
         posy = round(float(posSplit[1]))
         posx = nearestX(posx,8)
@@ -245,6 +248,7 @@ while True:
         posxby8 = posx/8
         posyby8 = posy/8
         player_neighb = find_player_neighbors(posxby8,posyby8)
+        has_player_update = True
 
     if "nearbywalls" in msgFromServer:
         walls = msgFromServer.split(":")[1]
@@ -260,13 +264,16 @@ while True:
     if "exit" in msgFromServer:
         exito = msgFromServer.split(":")[1]
         exitSplit = exito.split(",")
-        exit = (exitSplit[1], exitSplit[2])
+        exit = ((int(int(exitSplit[0]) / 8), int(int(exitSplit[1]) / 8)))
+        print("exit" + str(exit))
 
 
     if "playerjoined" in msgFromServer:
         playerjoined = msgFromServer.split(":")[1]
         playerjoinedsplit = playerjoined.split(",")
-        currentColour = playerjoinedsplit[1]
+        print(playerjoinedsplit)
+        currentColour = playerjoinedsplit[0]
+        print("type " + str(currentColour))
 
     if "nearbyfloors" in msgFromServer:
         # print(msgFromServer)
@@ -343,13 +350,13 @@ while True:
                     food.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
                 if item == "ammo":
                     ammo.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
-                if item == "redkey" and currentColour == "Warrior":
+                if item == "redkey" and currentColour == "warrior":
                     keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
-                if item == "greenkey" and currentColour == "Elf":
+                if item == "greenkey" and currentColour == "elf":
                     keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
-                if item == "yellowkey" and currentColour == "Wizard":
+                if item == "yellowkey" and currentColour == "wizard":
                     keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
-                if item == "bluekey" and currentColour == "Valkyrie":
+                if item == "bluekey" and currentColour == "valkyrie":
                     keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
 
     now = time.time()
@@ -359,5 +366,7 @@ while True:
     if (now - timeSinceMove) > moveInterval:
         plot(botmap)
         if floor_connections != {}:
-            make_step(posyby8,posxby8,botmap)
+            if has_player_update == True:
+                make_step(posyby8,posxby8,botmap)
+                has_player_update = False
         timeSinceMove = time.time()
