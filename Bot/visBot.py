@@ -313,7 +313,6 @@ while True:
                                 floor_connections[floortile].append(neighbour)
         floors_done = False
 
-
     # nearbyplayers
 
     # Warrior - Red == 16
@@ -325,6 +324,20 @@ while True:
         players = msgFromServer.split(":")[1]
         playersSplit = players.split(",")
         playerCoords = []
+        opponentx = msgFromServer.split(":")[1].split(',')[2]
+        opponenty = msgFromServer.split(":")[1].split(',')[3]
+        opponentx = nearestX(round(float(opponentx)), 8)
+        opponenty = nearestX(round(float(opponenty)), 8)
+
+        if (posx == opponentx) or (posy == opponenty) or (abs(posx-opponentx)==abs(posy-opponenty)):
+            requestmovemessage = "moveto:" + str(int(opponentx))  + "," + str(int(opponenty))
+            SendMessage(requestmovemessage)
+            tempammo = ammo
+            if ammo>2:
+                fireMessage = "fire:"
+                SendMessage(fireMessage)
+                tempammo -= 1
+
         for i in range(0, len(playersSplit) - 1, 3):
             playerCoords.append([playersSplit[i], playersSplit[i + 1], playersSplit[i + 2]])
         for coords in playerCoords:
@@ -347,6 +360,7 @@ while True:
     # 13 == greenkey
     # 14 == yellowkey
     # 15 == bluekey
+
 
     if "nearbyitem" in msgFromServer:
         items = msgFromServer.split(":")[1]
