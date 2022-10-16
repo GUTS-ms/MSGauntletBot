@@ -3,7 +3,7 @@ manualplayerone:true
 manualplayertwo:false
 starthealth:1
 maxhealth:10
-startammo:500
+startammo:1
 maxammo:1000
 treasurevalue:10
 killvalue:10

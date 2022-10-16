@@ -66,6 +66,8 @@ timeSinceDirectionFace = time.time()
 
 directions = ["n","s","e","w","nw","sw","ne","se"]
 
+ammocoords = []
+seen_items = []
 
 # Create a UDP socket
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -243,13 +245,12 @@ while True:
         if (posx == opponentx) or (posy == opponenty) or (abs(posx-opponentx)==abs(posy-opponenty)):
             requestmovemessage = "moveto:" + str(int(opponentx))  + "," + str(int(opponenty))
             SendMessage(requestmovemessage)
-       
+            tempammo = ammo
             if ammo<2:
                 fireMessage = "fire:"
                 SendMessage(fireMessage)
                 tempammo -= 1
-            
-            
+           
         
     if "nearbyitem" in msgFromServer:
         items = msgFromServer.split(":")[1]
@@ -262,13 +263,10 @@ while True:
                 seen_items.append((int(coords[1]), int(coords[2])))
                 item = coords[0].lower()
                 print("item is: " + item)
-                if item == "treasure":
-                    treasure.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
-                if item == "food":
-                    food.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
                 if item == "ammo":
-              
-
+                    ammocoords.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
+                    print("Ammo coords: ", ammocoords)
+            
 
 
     if "nearbyfloors" in msgFromServer:
@@ -299,5 +297,9 @@ while True:
     if (now - timeSinceMove) > moveInterval:
         plot(botmap)
         if floor_connections != {}:
+            if (ammo<2) and (len(ammocoords)!=0):
+                print("Moving to ammo...")
+                requestmovemessage = "moveto:" + str(int(ammocoords[0][0]))  + "," + str(int(ammocoords[0][1]))
+                SendMessage(requestmovemessage)
             make_step(posyby8,posxby8,botmap)
         timeSinceMove = time.time()
