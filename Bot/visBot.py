@@ -1,3 +1,4 @@
+from email.base64mime import header_length
 import math
 import socket
 import time
@@ -49,7 +50,7 @@ serverAddressPort   = ("127.0.0.1", 11000)
 bufferSize          = 1024
 
 #bunch of timers and intervals for executing some sample commands
-moveInterval = 2
+moveInterval = 2.5
 timeSinceMove = time.time()
 
 fireInterval = 5
@@ -89,6 +90,11 @@ ammo = []
 food = []
 treasure = []
 
+global health
+health = 0
+global current_ammo
+current_ammo = 5
+
 global warrior
 global elf
 global wizard
@@ -114,7 +120,7 @@ def heuristic(a, b):
         return np.sqrt((int(b[0]) - int(a[0])) ** 2 + (int(b[1]) - int(a[1])) ** 2)
 
 def make_step(posx,posy,botmap):
-    global keyInBag
+    global keyInBag, treasure
     start = (int(posy),int(posx))
     route = []
     best_coords = []
@@ -124,6 +130,13 @@ def make_step(posx,posy,botmap):
         keyInBag == "True"
     if exit != (None,None) and keyInBag == "True":
         route = astar(botmap, start, exit)
+    if len(treasure)>0:
+        route = astar(botmap, start, treasure.pop(0))
+    if len(food) > 0 and health < 2:
+        route = astar(botmap, start, food.pop(len(food)-1))
+    if len(ammo) > 0 and current_ammo < 6:
+        route = astar(botmap, start, ammo.pop(len(ammo)-1))
+
     for k in sorted(floor_connections, key=lambda k: len(floor_connections[k]), reverse=True):
             best_coords.append(k)
     counter = 0
@@ -148,7 +161,7 @@ def make_step(posx,posy,botmap):
         requestmovemessage = "moveto:" + str(int(new_x_pos))  + "," + str(int(new_y_pos))
         print(requestmovemessage)
         SendMessage(requestmovemessage)
-        time.sleep(0.25)
+        time.sleep(0.3)
         x_coords.append(x)
         y_coords.append(y)
 
@@ -228,6 +241,8 @@ while True:
         
         posSplit = pos.split(",")
         print(posSplit)
+        health = int(posSplit[2])
+        current_ammo = int(posSplit[3])
         keyInBag = posSplit[4]
         print(keyInBag)
         posx = round(float(posSplit[0]))
@@ -366,7 +381,6 @@ while True:
     if (now - timeSinceMove) > moveInterval:
         plot(botmap)
         if floor_connections != {}:
-            if has_player_update == True:
-                make_step(posyby8,posxby8,botmap)
-                has_player_update = False
+            make_step(posyby8,posxby8,botmap)
+            has_player_update = False
         timeSinceMove = time.time()
