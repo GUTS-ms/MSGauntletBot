@@ -82,21 +82,29 @@ prev = None
 floors_done = False
 
 global currentColour
-global redkey
-global greenkey
-global yellowkey
-global bluekey
-
 global ammo
 global food
 global treasure
+ammo = []
+food = []
+treasure = []
 
 global warrior
 global elf
 global wizard
 global valkyrie
+warrior = None
+elf = None
+wizard = None
+valkyrie = None
 
 global exit
+exit = None
+
+global keyLocation
+keyLocation = None
+global keyInBag
+keyInBag = False
 
 def SendMessage(requestmovemessage):
     bytesToSend = str.encode(requestmovemessage)
@@ -112,6 +120,10 @@ def make_step(posx,posy,botmap):
     start = (int(posy),int(posx))
     route = []
     best_coords = []
+    if keyLocation != None:
+        route = astar(botmap, start, keyLocation)
+    if exit != None and keyInBag == True:
+        route = astar(botmap, start, exit)
     for k in sorted(floor_connections, key=lambda k: len(floor_connections[k]), reverse=True):
             best_coords.append(k)
     counter = 0
@@ -331,14 +343,14 @@ while True:
                     food.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
                 if item == "ammo":
                     ammo.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
-                if item == "redkey":
-                    redkey = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
-                if item == "greenkey":
-                    greenkey = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
-                if item == "yellowkey":
-                    yellowkey = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
-                if item == "bluekey":
-                    bluekey = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+                if item == "redkey" and currentColour == "Warrior":
+                    keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+                if item == "greenkey" and currentColour == "Elf":
+                    keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+                if item == "yellowkey" and currentColour == "Wizard":
+                    keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+                if item == "bluekey" and currentColour == "Valkyrie":
+                    keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
 
     now = time.time()
 
