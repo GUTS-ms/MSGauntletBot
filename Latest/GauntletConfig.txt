@@ -13,7 +13,7 @@ healthspawn:5
 ammospawn:5
 treasurespawn:5
 noitems:false
-deathmatchmode:false
+deathmatchmode:true
 spawnitemsduringgame:false
 itemspawntimer:5
 

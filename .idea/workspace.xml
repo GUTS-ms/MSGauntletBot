@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="766f7160-30d0-499b-8024-d6457c376348" name="Changes" comment="">
+    <list default="true" id="300ae1ec-e01f-494a-840f-cdc3b82a453f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Bot/mpltlibstyle.py" beforeDir="false" afterPath="$PROJECT_DIR$/Bot/mpltlibstyle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Bot/visBot.py" beforeDir="false" afterPath="$PROJECT_DIR$/Bot/visBot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Latest/GauntletConfig.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Latest/GauntletConfig.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
