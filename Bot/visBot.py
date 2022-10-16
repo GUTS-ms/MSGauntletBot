@@ -161,7 +161,7 @@ def make_step(posx,posy,botmap):
         requestmovemessage = "moveto:" + str(int(new_x_pos))  + "," + str(int(new_y_pos))
         print(requestmovemessage)
         SendMessage(requestmovemessage)
-        time.sleep(0.3)
+        time.sleep(0.5)
         x_coords.append(x)
         y_coords.append(y)
 
