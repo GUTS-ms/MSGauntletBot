@@ -81,6 +81,22 @@ seen_items=[]
 prev = None
 floors_done = False
 
+global currentColour
+global redkey
+global greenkey
+global yellowkey
+global bluekey
+
+global ammo
+global food
+global treasure
+
+global warrior
+global elf
+global wizard
+global valkyrie
+
+global exit
 
 def SendMessage(requestmovemessage):
     bytesToSend = str.encode(requestmovemessage)
@@ -124,17 +140,17 @@ def make_step(posx,posy,botmap):
         x_coords.append(x)
         y_coords.append(y)
 
-    #fig, ax = plt.subplots(figsize=(20,20))
-
-    #ax.imshow(botmap, cmap=plt.cm.Dark2)
-
-    #ax.scatter(start[0],start[1], marker = "*", color = "yellow", s = 200)
-
-    #ax.scatter(goal[0],goal[1], marker = "*", color = "red", s = 200)
-
-    #ax.plot(x_coords,y_coords, color = "black")
-
-    #plt.show()
+    # fig, ax = plt.subplots(figsize=(20,20))
+    #
+    # ax.imshow(botmap, cmap=plt.cm.Dark2)
+    #
+    # ax.scatter(start[0],start[1], marker = "*", color = "yellow", s = 200)
+    #
+    # ax.scatter(goal[0],goal[1], marker = "*", color = "red", s = 200)
+    #
+    # ax.plot(x_coords,y_coords, color = "black")
+    #
+    # plt.show()
 
 def astar(array, start, goal):
     neighbors = [(0,1),(0,-1),(1,0),(-1,0)]
@@ -228,7 +244,18 @@ while True:
             if (int(coords[0]), int(coords[1])) not in seen_walls:
                 seen_walls.append(coords)
                 botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
-        
+
+    if "exit" in msgFromServer:
+        exito = msgFromServer.split(":")[1]
+        exitSplit = exito.split(",")
+        exit = (exitSplit[1], exitSplit[2])
+
+
+    if "playerjoined" in msgFromServer:
+        playerjoined = msgFromServer.split(":")[1]
+        playerjoinedsplit = playerjoined.split(",")
+        currentColour = playerjoinedsplit[1]
+
     if "nearbyfloors" in msgFromServer:
         # print(msgFromServer)
         floors = msgFromServer.split(":")[1]
@@ -267,17 +294,16 @@ while True:
         for i in range(0, len(playersSplit) - 1, 3):
             playerCoords.append([playersSplit[i], playersSplit[i + 1], playersSplit[i + 2]])
         for coords in playerCoords:
-            if (int(coords[1]), int(coords[2])) in player_neighb:
-                player = coords[0].lower()
-                print("player is: " + player)
-                if player == "warrior" or player == "red":
-                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 16
-                if player == "elf" or player == "green":
-                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 17
-                if player == "wizard" or player == "yellow":
-                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 18
-                if player == "valkyrie" or player == "blue":
-                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 19
+            player = coords[0].lower()
+            print("player is: " + player)
+            if player == "warrior":
+                warrior = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+            if player == "elf":
+                elf = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+            if player == "wizard":
+                wizard = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+            if player == "valkyrie":
+                valkyrie = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
 
     # possible items
     # 3 == Treasure
@@ -296,24 +322,23 @@ while True:
             itemCoords.append([itemsSplit[i], itemsSplit[i + 1], itemsSplit[i + 2]])
         for coords in itemCoords:
             if (int(coords[1]), int(coords[2])) not in seen_items:
-                if (int(coords[1]), int(coords[2])) in player_neighb:
-                    seen_items.append((int(coords[1]), int(coords[2])))
-                    item = coords[0].lower()
-                    print("item is: " + item)
-                    if item == "treasure":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 3
-                    if item == "food":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 4
-                    if item == "ammo":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 5
-                    if item == "redkey":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 12
-                    if item == "greenkey":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 13
-                    if item == "yellowkey":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 14
-                    if item == "bluekey":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 15
+                seen_items.append((int(coords[1]), int(coords[2])))
+                item = coords[0].lower()
+                print("item is: " + item)
+                if item == "treasure":
+                    treasure.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
+                if item == "food":
+                    food.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
+                if item == "ammo":
+                    ammo.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
+                if item == "redkey":
+                    redkey = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+                if item == "greenkey":
+                    greenkey = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+                if item == "yellowkey":
+                    yellowkey = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+                if item == "bluekey":
+                    bluekey = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
 
     now = time.time()
 
