@@ -1,5 +1,5 @@
 ﻿port:11000
-manualplayerone:false
+manualplayerone:true
 manualplayertwo:false
 starthealth:1
 maxhealth:10

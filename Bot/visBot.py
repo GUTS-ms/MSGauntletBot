@@ -332,14 +332,17 @@ while True:
         if (posx == opponentx) or (posy == opponenty) or (abs(posx-opponentx)==abs(posy-opponenty)):
             requestmovemessage = "moveto:" + str(int(opponentx))  + "," + str(int(opponenty))
             SendMessage(requestmovemessage)
-            tempammo = ammo
-            if ammo>2:
-                fireMessage = "fire:"
-                SendMessage(fireMessage)
-                tempammo -= 1
+    
+     
+            fireMessage = "fire:"
+            SendMessage(fireMessage)
 
-        for i in range(0, len(playersSplit) - 1, 3):
-            playerCoords.append([playersSplit[i], playersSplit[i + 1], playersSplit[i + 2]])
+
+        try:
+            for i in range(0, len(playersSplit) - 1, 3):
+                playerCoords.append([playersSplit[i], playersSplit[i + 1], playersSplit[i + 2]])
+        except:
+            continue
         for coords in playerCoords:
             player = coords[0].lower()
             print("player is: " + player)
