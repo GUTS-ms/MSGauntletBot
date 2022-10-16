@@ -1,10 +1,10 @@
 ﻿port:11000
-manualplayerone:false
+manualplayerone:true
 manualplayertwo:false
 starthealth:1
 maxhealth:10
-startammo:5
-maxammo:10
+startammo:500
+maxammo:1000
 treasurevalue:10
 killvalue:10
 deathrespawntimer:10
