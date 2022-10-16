@@ -249,7 +249,27 @@ while True:
                 SendMessage(fireMessage)
                 tempammo -= 1
             
+            
         
+    if "nearbyitem" in msgFromServer:
+        items = msgFromServer.split(":")[1]
+        itemsSplit = items.split(",")
+        itemCoords = []
+        for i in range(0, len(itemsSplit) - 1, 3):
+            itemCoords.append([itemsSplit[i], itemsSplit[i + 1], itemsSplit[i + 2]])
+        for coords in itemCoords:
+            if (int(coords[1]), int(coords[2])) not in seen_items:
+                seen_items.append((int(coords[1]), int(coords[2])))
+                item = coords[0].lower()
+                print("item is: " + item)
+                if item == "treasure":
+                    treasure.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
+                if item == "food":
+                    food.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
+                if item == "ammo":
+              
+
+
 
     if "nearbyfloors" in msgFromServer:
         # print(msgFromServer)
