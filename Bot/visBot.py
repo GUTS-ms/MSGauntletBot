@@ -1,3 +1,4 @@
+from email.base64mime import header_length
 import math
 import socket
 import time
@@ -29,25 +30,18 @@ def find_neighbors(a, i, j):
                     neighbors.append((a[y][z],y,z))
     return neighbors
 
-def find_unexp(arr):
-    for pos, x in np.ndenumerate(arr):
-        if x == 0:
-            neighb=find_neighbors(arr, pos[0], pos[1])
-            for y in neighb:
-                if y[0] == 2:
-                    print("found unexplored at " + str(y[2]) +" " + str(y[1]))
-                    return (y[2], y[1])
-    print("no unexplored found")
-
 def find_player_neighbors(x, y):
     neighb = []
     for i in range(-1,2):
         for j in range(-1,2):
-            neighb.append((int((x+i)*8), int((y+j)*8)))
+            if i == 0 and j == 0:
+                continue
+            else:
+                neighb.append((int((x+i)), int((y+j))))
     return neighb
 
-msgFromClient       = "requestjoin:mydisplayname"
-name = "mydisplayname"
+msgFromClient       = "requestjoin:BestBot"
+name = "BestBot"
 
 bytesToSend         = str.encode(msgFromClient)
 
@@ -56,7 +50,7 @@ serverAddressPort   = ("127.0.0.1", 11000)
 bufferSize          = 1024
 
 #bunch of timers and intervals for executing some sample commands
-moveInterval = 5
+moveInterval = 2.5
 timeSinceMove = time.time()
 
 fireInterval = 5
@@ -64,9 +58,6 @@ timeSinceFire = time.time()
 
 stopInterval = 30
 timeSinceStop = time.time()
-
-plotInterval = 5
-timeSincePlot = time.time()
 
 directionMoveInterval = 15
 timeSinceDirectionMove = time.time()
@@ -85,24 +76,76 @@ UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
 seen_walls=[]
 seen_floors=[]
+floor_connections = {}
+botmap = np.full((100,100),0)
 seen_items=[]
-botmap = np.full((50,50),0)
 prev = None
+floors_done = False
 
+global currentColour
+global ammo
+global food
+global treasure
+ammo = []
+food = []
+treasure = []
+
+global health
+health = 0
+global current_ammo
+current_ammo = 5
+
+global warrior
+global elf
+global wizard
+global valkyrie
+warrior = None
+elf = None
+wizard = None
+valkyrie = None
+
+global exit
+exit = (None,None)
+
+global keyLocation
+keyLocation = (None,None)
+global keyInBag
+keyInBag = "False"
 
 def SendMessage(requestmovemessage):
     bytesToSend = str.encode(requestmovemessage)
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
 def heuristic(a, b):
-        return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
+        return np.sqrt((int(b[0]) - int(a[0])) ** 2 + (int(b[1]) - int(a[1])) ** 2)
 
-def make_step(posx,posy,next_move,botmap):
-    start = (posy,posx)
+def make_step(posx,posy,botmap):
+    global keyInBag, treasure
+    start = (int(posy),int(posx))
+    route = []
+    best_coords = []
+    print("key locatoin" + str(keyLocation))
+    if keyLocation != (None,None):
+        route = astar(botmap, start, keyLocation)
+        keyInBag == "True"
+    if exit != (None,None) and keyInBag == "True":
+        route = astar(botmap, start, exit)
+    if len(treasure)>0:
+        route = astar(botmap, start, treasure.pop(0))
+    if len(food) > 0 and health < 2:
+        route = astar(botmap, start, food.pop(len(food)-1))
+    if len(ammo) > 0 and current_ammo < 6:
+        route = astar(botmap, start, ammo.pop(len(ammo)-1))
 
-    goal = next_move
-    route = astar(botmap, start, goal)
-    route = route + [start]
+    for k in sorted(floor_connections, key=lambda k: len(floor_connections[k]), reverse=True):
+            best_coords.append(k)
+    counter = 0
+    while route == []:
+        goal = best_coords[counter]
+        goal = (goal[1],goal[0])
+        route = astar(botmap, start, goal)
+        counter += 1
+
     route = route[::-1]
     print(route)
     x_coords = []
@@ -115,16 +158,27 @@ def make_step(posx,posy,next_move,botmap):
         y_move_direction = int(posy - y)
         new_x_pos = int((posx*8) - (x_move_direction*8))
         new_y_pos = int((posy*8) - (y_move_direction*8))
-        print(new_x_pos)
-        print(new_y_pos)
-        requestmovemessage = "moveto:" + str(int(new_y_pos))  + "," + str(int(new_x_pos))
-        #print(requestmovemessage)
+        requestmovemessage = "moveto:" + str(int(new_x_pos))  + "," + str(int(new_y_pos))
+        print(requestmovemessage)
         SendMessage(requestmovemessage)
+        time.sleep(0.3)
         x_coords.append(x)
         y_coords.append(y)
 
+    # fig, ax = plt.subplots(figsize=(20,20))
+    #
+    # ax.imshow(botmap, cmap=plt.cm.Dark2)
+    #
+    # ax.scatter(start[0],start[1], marker = "*", color = "yellow", s = 200)
+    #
+    # ax.scatter(goal[0],goal[1], marker = "*", color = "red", s = 200)
+    #
+    # ax.plot(x_coords,y_coords, color = "black")
+    #
+    # plt.show()
+
 def astar(array, start, goal):
-    neighbors = [(0,1),(0,-1),(1,0),(-1,0),(1,1),(1,-1),(-1,1),(-1,-1)]
+    neighbors = [(0,1),(0,-1),(1,0),(-1,0)]
     close_set = set()
     came_from = {}
     gscore = {start:0}
@@ -137,7 +191,7 @@ def astar(array, start, goal):
         if current == goal:
             data = []
             while current in came_from:
-                data.append(current)
+                data.append((current[1],current[0]))
                 current = came_from[current]
             return data
         close_set.add(current)
@@ -147,7 +201,7 @@ def astar(array, start, goal):
             tentative_g_score = gscore[current] + heuristic(current, neighbor)
             if 0 <= neighbor[0] < array.shape[0]:
                 if 0 <= neighbor[1] < array.shape[1]:                
-                    if array[int(neighbor[0]),int(neighbor[1])] == 1:
+                    if array[int(neighbor[1]),int(neighbor[0])] != 2:
                         continue
                 else:
                     # array bound y walls
@@ -186,6 +240,11 @@ while True:
         pos = msgFromServer.split(":")[1]
         
         posSplit = pos.split(",")
+        print(posSplit)
+        health = int(posSplit[2])
+        current_ammo = int(posSplit[3])
+        keyInBag = posSplit[4]
+        print(keyInBag)
         posx = round(float(posSplit[0]))
         posy = round(float(posSplit[1]))
         posx = nearestX(posx,8)
@@ -204,6 +263,7 @@ while True:
         posxby8 = posx/8
         posyby8 = posy/8
         player_neighb = find_player_neighbors(posxby8,posyby8)
+        has_player_update = True
 
     if "nearbywalls" in msgFromServer:
         walls = msgFromServer.split(":")[1]
@@ -213,10 +273,23 @@ while True:
             wallcoords.append((wallsSplit[i],wallsSplit[i+1]))
         for coords in wallcoords:
             if (int(coords[0]), int(coords[1])) not in seen_walls:
-                if (int(coords[0]), int(coords[1])) in player_neighb:
-                    seen_walls.append(coords)
-                    botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
-        
+                seen_walls.append(coords)
+                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=1
+
+    if "exit" in msgFromServer:
+        exito = msgFromServer.split(":")[1]
+        exitSplit = exito.split(",")
+        exit = ((int(int(exitSplit[0]) / 8), int(int(exitSplit[1]) / 8)))
+        print("exit" + str(exit))
+
+
+    if "playerjoined" in msgFromServer:
+        playerjoined = msgFromServer.split(":")[1]
+        playerjoinedsplit = playerjoined.split(",")
+        print(playerjoinedsplit)
+        currentColour = playerjoinedsplit[0]
+        print("type " + str(currentColour))
+
     if "nearbyfloors" in msgFromServer:
         # print(msgFromServer)
         floors = msgFromServer.split(":")[1]
@@ -226,9 +299,20 @@ while True:
             floorscoords.append((floorsSplit[i],floorsSplit[i+1]))
         for coords in floorscoords:
             if (int(coords[0]), int(coords[1])) not in seen_floors:
-                if (int(coords[0]), int(coords[1])) in player_neighb:
-                    seen_floors.append(coords)
-                    botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
+
+                seen_floors.append(coords)
+                botmap[int(int(coords[1])/8),int(int(coords[0])/8)]=2
+            if floors_done == False:
+                coords_8 = (int(int(coords[1])/8),int(int(coords[0])/8))
+                floor_connections[coords_8] = []
+                for floortile in floor_connections.keys():
+                    tile_neighbours_list = find_player_neighbors(floortile[0],floortile[1])
+                    for neighbour in tile_neighbours_list:
+                        if botmap[neighbour[0]][neighbour[1]] == 0:
+                            if neighbour not in floor_connections[floortile]:
+                                floor_connections[floortile].append(neighbour)
+        floors_done = False
+
 
     # nearbyplayers
 
@@ -244,17 +328,16 @@ while True:
         for i in range(0, len(playersSplit) - 1, 3):
             playerCoords.append([playersSplit[i], playersSplit[i + 1], playersSplit[i + 2]])
         for coords in playerCoords:
-            if (int(coords[1]), int(coords[2])) in player_neighb:
-                player = coords[0].lower()
-                print("player is: " + player)
-                if player == "warrior" or player == "red":
-                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 16
-                if player == "elf" or player == "green":
-                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 17
-                if player == "wizard" or player == "yellow":
-                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 18
-                if player == "valkyrie" or player == "blue":
-                    botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 19
+            player = coords[0].lower()
+            print("player is: " + player)
+            if player == "warrior":
+                warrior = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+            if player == "elf":
+                elf = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+            if player == "wizard":
+                wizard = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+            if player == "valkyrie":
+                valkyrie = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
 
     # possible items
     # 3 == Treasure
@@ -273,34 +356,31 @@ while True:
             itemCoords.append([itemsSplit[i], itemsSplit[i + 1], itemsSplit[i + 2]])
         for coords in itemCoords:
             if (int(coords[1]), int(coords[2])) not in seen_items:
-                if (int(coords[1]), int(coords[2])) in player_neighb:
-                    seen_items.append((int(coords[1]), int(coords[2])))
-                    item = coords[0].lower()
-                    print("item is: " + item)
-                    if item == "treasure":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 3
-                    if item == "food":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 4
-                    if item == "ammo":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 5
-                    if item == "redkey":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 12
-                    if item == "greenkey":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 13
-                    if item == "yellowkey":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 14
-                    if item == "bluekey":
-                        botmap[int(int(coords[1]) / 8), int(int(coords[2]) / 8)] = 15
+                seen_items.append((int(coords[1]), int(coords[2])))
+                item = coords[0].lower()
+                print("item is: " + item)
+                if item == "treasure":
+                    treasure.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
+                if item == "food":
+                    food.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
+                if item == "ammo":
+                    ammo.append((int(int(coords[1]) / 8), int(int(coords[2]) / 8)))
+                if item == "redkey" and currentColour == "warrior":
+                    keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+                if item == "greenkey" and currentColour == "elf":
+                    keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+                if item == "yellowkey" and currentColour == "wizard":
+                    keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+                if item == "bluekey" and currentColour == "valkyrie":
+                    keyLocation = (int(int(coords[1]) / 8), int(int(coords[2]) / 8))
+
     now = time.time()
 
     #every few seconds, request to move to a random point nearby. No pathfinding, server will 
     #attempt to move in straight line.
     if (now - timeSinceMove) > moveInterval:
-        next_move = find_unexp(botmap)
         plot(botmap)
-        make_step(posyby8,posxby8,next_move,botmap)
+        if floor_connections != {}:
+            make_step(posyby8,posxby8,botmap)
+            has_player_update = False
         timeSinceMove = time.time()
-
-    #if (now - timeSincePlot) > plotInterval:
-    #    plot(botmap)
-    #    timeSincePlot = time.time()

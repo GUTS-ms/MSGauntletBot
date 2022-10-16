@@ -45,12 +45,5 @@ def plot(botmap):
     toolbar = NavigationToolbar2Tk(canvas, root)
 
     canvas.draw_idle()
-    root.after(500, root.destroy)
-    root.mainloop()
 
-
-
-
-
-
-
+    root.after(1, root.destroy)

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="766f7160-30d0-499b-8024-d6457c376348" name="Changes" comment="">
+    <list default="true" id="766f7160-30d0-499b-8024-d6457c376348" name="Changes" comment="merged items and lewis working movements&#10;eatma .ideas">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Bot/mpltlibstyle.py" beforeDir="false" afterPath="$PROJECT_DIR$/Bot/mpltlibstyle.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Bot/visBot.py" beforeDir="false" afterPath="$PROJECT_DIR$/Bot/visBot.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -12,6 +14,11 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="items" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
@@ -23,14 +30,14 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/User/OneDrive - University of Glasgow/GUTS-MS/MSGauntletBot&quot;
-  }
-}</component>
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+  </component>
   <component name="RunManager">
     <configuration name="visBot" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="MSGauntletBot" />
@@ -44,6 +51,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Bot/visBot.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -57,13 +65,40 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="bbf78b56-4ff4-4ce2-adea-575d2a5cc714" name="Changes" comment="" />
+      <changelist id="766f7160-30d0-499b-8024-d6457c376348" name="Changes" comment="" />
       <created>1665784264462</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1665784264462</updated>
+      <workItem from="1665850484062" duration="5023000" />
+      <workItem from="1665872518963" duration="8002000" />
     </task>
+    <task id="LOCAL-00001" summary="added items, ekys need to be yellowkey,redkey not keys">
+      <created>1665858264484</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1665858264485</updated>
+    </task>
+    <task id="LOCAL-00002" summary="added other player calls">
+      <created>1665876066578</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1665876066578</updated>
+    </task>
+    <task id="LOCAL-00003" summary="merged items and lewis working movements&#10;eatma .ideas">
+      <created>1665880523662</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1665880523662</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -75,5 +110,14 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="added items, ekys need to be yellowkey,redkey not keys" />
+    <MESSAGE value="added other player calls" />
+    <MESSAGE value="merged items and lewis working movements&#10;eatma .ideas" />
+    <option name="LAST_COMMIT_MESSAGE" value="merged items and lewis working movements&#10;eatma .ideas" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/MSGauntletBot$visBot.coverage" NAME="visBot Coverage Results" MODIFIED="1665881413190" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Bot" />
   </component>
 </project>
